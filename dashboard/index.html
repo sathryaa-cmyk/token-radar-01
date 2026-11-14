@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="kicker">TOKEN RADAR · radar-2 · snapshot <span id="asof"></span></p>
+    <h1>Which protocol should you farm next?</h1>
+    <p class="lede">Every protocol in the snapshot that <strong>records no token yet</strong>, ranked by what its launch would be worth if its record stayed as it is. The value follows from the snapshot's own figures — TVL, seven-day growth, age with no token, chains — priced against the live protocols in the same category. Nothing here predicts whether or when a token is issued.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+<main class="wrap">
+  <section class="controls" aria-label="Filter and sort the board">
+    <div class="row">
+      <label>Search <input id="q" type="search" placeholder="Protocol name or slug…" autocomplete="off"></label>
+      <label>Category <select id="cat"><option value="">All categories</option></select></label>
+      <label>Chain <select id="chain"><option value="">All chains</option></select></label>
+      <label>Sort by <select id="sort">
+        <option value="value">Implied value ↓</option>
+        <option value="tvl">TVL ↓</option>
+        <option value="change">7-day change ↓</option>
+        <option value="age">Age ↓</option>
+        <option value="name">Name A–Z</option>
+      </select></label>
+    </div>
+    <div class="row scopes" role="group" aria-label="Board scope">
+      <button data-scope="all" class="on">All pre-token</button>
+      <button data-scope="watchlist">Watchlist only</button>
+      <button data-scope="early">Early finds</button>
+      <button data-scope="live">Live tokens — already trading</button>
+    </div>
+    <p class="count" id="count"></p>
+  </section>
+  <section id="detail" class="detail" hidden></section>
+  <section class="boardwrap">
+    <table id="board">
+      <thead><tr>
+        <th data-k="rank">#</th><th data-k="name">Protocol</th><th data-k="category">Category</th>
+        <th>Chains</th><th data-k="tvl">TVL</th><th data-k="change">7d</th><th data-k="age">Age</th>
+        <th data-k="value">Implied value</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="note" id="tablenote"></p>
+  </section>
+  <section class="model" id="model">
+    <h2>How the value is worked out</h2>
+    <p><code>implied = TVL × category multiple × growth × maturity × breadth</code></p>
+    <ul>
+      <li><strong>Category multiple</strong> — the median market-cap / TVL of the <em>live</em> protocols in the same category, priced from this same snapshot. A lending protocol is priced like live lending protocols, a DEX like live DEXs. Categories with fewer than 3 live comparables take the whole live set's median.</li>
+      <li><strong>Growth</strong> — <code>1 + clamp(7d change, −40%, +60%) × 0.6</code>. A +4,448% week is a data spike, not a trend, so the growth leg is capped hard.</li>
+      <li><strong>Maturity</strong> — <code>0.70 + min(age, 1095 days) / 1095 × 0.30</code>. Older with no token means more pent-up launch value; a young protocol earns its place on growth and size. Age is <code>listed_at</code> to the snapshot date; unknown age counts as 365 days.</li>
+      <li><strong>Breadth</strong> — <code>1 + 0.02 × extra chains</code> (at most 5 extra): a protocol live on more chains reaches more farmers.</li>
+    </ul>
+    <h3>Category multiples, from this snapshot's live protocols</h3>
+    <table class="mults"><thead><tr><th>Category</th><th>Multiple</th><th>Live comparables</th></tr></thead><tbody id="mults"></tbody></table>
+    <p class="fine">The board covers every protocol on the snapshot's watchlist, plus every other pre-token protocol that is not an exchange, a bridge, a liquid-staking product or a versioned pool. “Records no token” is what the snapshot says — a protocol on the list may still have a token its DefiLlama record does not carry. The Live tab shows protocols whose token already trades at the market's own value, never a model's claim. Farm steps are a starting plan, not advice: never pay to claim, and claim only from a link the protocol itself publishes.</p>
+  </section>
+</main>
+<footer class="wrap fine" id="source"></footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
